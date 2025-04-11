@@ -5,7 +5,7 @@ from email.mime.text import MIMEText
 import os
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*"}})  # CORS ativado para qualquer origem
+CORS(app, resources={r"/*": {"origins": "*"}})  # CORS habilitado para todas as origens
 
 EMAIL_REMETENTE = os.getenv("EMAIL_REMETENTE")
 SENHA_APP = os.getenv("SENHA_APP")
@@ -13,10 +13,8 @@ EMAIL_DESTINO = os.getenv("EMAIL_DESTINO")
 
 @app.route("/enviar", methods=["POST"])
 def enviar_email():
-    print("Requisição recebida!")
     try:
-        data = request.json
-        print("Dados recebidos:", data)
+        data = request.get_json(force=True)
 
         tipo = data.get("tipo")
         produtos = data.get("produtos")
@@ -37,11 +35,9 @@ def enviar_email():
             smtp.login(EMAIL_REMETENTE, SENHA_APP)
             smtp.send_message(mensagem)
 
-        print("E-mail enviado com sucesso!")
         return jsonify({"status": "sucesso"}), 200
 
     except Exception as e:
-        print("Erro ao enviar:", str(e))
         return jsonify({"status": "erro", "mensagem": str(e)}), 500
 
 if __name__ == "__main__":
