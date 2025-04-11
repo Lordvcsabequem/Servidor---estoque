@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: servidor-estoque
+    env: python
+    plan: free
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "python app.py"
+    envVars:
+      - key: EMAIL_REMETENTE
+        value: seuemail@gmail.com
+      - key: SENHA_APP
+        value: sua_senha_de_app
+      - key: EMAIL_DESTINO
+        value: seuemail@gmail.com
