@@ -1,44 +1,72 @@
-from flask import Flask, request, jsonify
-from flask_cors import CORS
-import smtplib
-from email.mime.text import MIMEText
-import os
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Formulário de Teste com API</title>
+  <style>
+    body { font-family: sans-serif; background: #f4f4f4; padding: 20px; }
+    form, pre { background: #fff; padding: 20px; border-radius: 8px; max-width: 600px; margin: auto; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    input, textarea, button, select { width: 100%; margin-top: 10px; padding: 10px; border-radius: 5px; border: 1px solid #ccc; }
+    button { background-color: #333; color: white; font-weight: bold; cursor: pointer; }
+    pre { white-space: pre-wrap; margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <form id="form-api">
+    <h2>Teste com API Flask</h2>
 
-app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*"}})  # CORS habilitado para todas as origens
+    <label>Tipo:</label>
+    <select id="tipo">
+      <option value="Saída">Saída</option>
+      <option value="Perda">Perda</option>
+    </select>
 
-EMAIL_REMETENTE = os.getenv("EMAIL_REMETENTE")
-SENHA_APP = os.getenv("SENHA_APP")
-EMAIL_DESTINO = os.getenv("EMAIL_DESTINO")
+    <label>Produtos:</label>
+    <textarea id="produtos" rows="4">Água 10
+Coca 5</textarea>
 
-@app.route("/enviar", methods=["POST"])
-def enviar_email():
-    try:
-        data = request.get_json(force=True)
+    <label>Responsável:</label>
+    <input type="text" id="responsavel" value="Weberth">
 
-        tipo = data.get("tipo")
-        produtos = data.get("produtos")
-        responsavel = data.get("responsavel")
-        motivo = data.get("motivo")
+    <label>Motivo (se for perda):</label>
+    <input type="text" id="motivo">
 
-        corpo = f"Tipo: {tipo}\nResponsável: {responsavel}\n"
-        if motivo:
-            corpo += f"Motivo da perda: {motivo}\n"
-        corpo += "\nProdutos:\n" + produtos
+    <button type="submit">Testar Envio</button>
+  </form>
 
-        mensagem = MIMEText(corpo)
-        mensagem["Subject"] = f"{tipo} de Estoque"
-        mensagem["From"] = EMAIL_REMETENTE
-        mensagem["To"] = EMAIL_DESTINO
+  <pre id="resposta">Resposta aparecerá aqui...</pre>
 
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as smtp:
-            smtp.login(EMAIL_REMETENTE, SENHA_APP)
-            smtp.send_message(mensagem)
+  <script>
+    const form = document.getElementById("form-api");
+    const resposta = document.getElementById("resposta");
 
-        return jsonify({"status": "sucesso"}), 200
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
 
-    except Exception as e:
-        return jsonify({"status": "erro", "mensagem": str(e)}), 500
+      const dados = {
+        tipo: document.getElementById("tipo").value,
+        produtos: document.getElementById("produtos").value,
+        responsavel: document.getElementById("responsavel").value,
+        motivo: document.getElementById("motivo").value,
+      };
 
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=10000)
+      resposta.textContent = "Enviando...";
+
+      try {
+        const r = await fetch("https://servidor-estoque.onrender.com/enviar", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(dados)
+        });
+
+        const res = await r.json();
+        resposta.textContent = JSON.stringify(res, null, 2);
+      } catch (err) {
+        resposta.textContent = "Erro: " + err;
+      }
+    });
+  </script>
+</body>
+</html>
