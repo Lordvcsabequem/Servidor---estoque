@@ -1,12 +1,15 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 import smtplib
 from email.mime.text import MIMEText
+import os
 
 app = Flask(__name__)
+CORS(app)
 
-EMAIL_REMETENTE = "seuemail@gmail.com"
-SENHA_APP = "sua_senha_de_app"
-EMAIL_DESTINO = "seuemail@gmail.com"
+EMAIL_REMETENTE = os.getenv("EMAIL_REMETENTE")
+SENHA_APP = os.getenv("SENHA_APP")
+EMAIL_DESTINO = os.getenv("EMAIL_DESTINO")
 
 @app.route("/enviar", methods=["POST"])
 def enviar_email():
