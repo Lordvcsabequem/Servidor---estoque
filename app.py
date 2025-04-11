@@ -19,14 +19,9 @@ def enviar_email():
     responsavel = data.get("responsavel")
     motivo = data.get("motivo")
 
-    corpo = f"""
-    Tipo: {tipo}
-    Responsável: {responsavel}
-    """
-
+    corpo = f"Tipo: {tipo}\nResponsável: {responsavel}\n"
     if motivo:
         corpo += f"Motivo da perda: {motivo}\n"
-
     corpo += "\nProdutos:\n" + produtos
 
     mensagem = MIMEText(corpo)
